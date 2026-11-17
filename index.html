@@ -258,6 +258,12 @@
     <div class="lightbox-caption">
       <h4 id="lbTitle"></h4>
       <p id="lbMeta"></p>
+
+      <a id="lbDownload" href="#" download
+         style="display:inline-block;margin-top:14px;padding:10px 20px;border:1px solid #C9A45C;border-radius:6px;color:#C9A45C;text-decoration:none;font-weight:600;">
+            ↓ Download Photo
+            </a>
+            
     </div>
   </div>
 </div>
@@ -510,6 +516,19 @@
     lbImage.alt = item.title + " — " + item.category;
     lbTitle.textContent = item.title;
     lbMeta.textContent = item.category + " · " + item.year;
+
+    var lbDownload = document.getElementById("lbDownload");
+
+    if (item.image) {
+        var downloadUrl = new URL(item.image, window.location.href);
+            downloadUrl.searchParams.set("download", item.title || "school-photo");
+
+                lbDownload.href = downloadUrl.toString();
+                    lbDownload.setAttribute("download", item.title || "school-photo.jpg");
+                        lbDownload.style.display = "inline-block";
+                        } else {
+                            lbDownload.style.display = "none";
+                            }              
   }
   function closeLightbox() {
     lightbox.classList.remove("is-open");
