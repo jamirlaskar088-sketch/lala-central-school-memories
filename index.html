@@ -590,8 +590,6 @@ if (videoResult.error) {
     var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{6,})/);
     return m ? "https://www.youtube.com/embed/" + m[1] : null;
   }
-
-  function openVideo(item) {
     vmTitle.textContent = item.title;
     vmMeta.textContent = item.category + " · " + item.year;
     var inner;
@@ -599,7 +597,12 @@ if (videoResult.error) {
       var yt = youTubeEmbed(item.videoUrl);
       inner = yt
         ? '<iframe src="' + yt + '" title="' + escapeHTML(item.title) + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
-        : '<video src="' + item.videoUrl + '" controls autoplay></video>';
+        
+: '<video controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:contain;">' +
+  '<source src="' + item.videoUrl + '" type="video/mp4">' +
+  'Your browser does not support video playback.' +
+  '</video>';
+
     } else {
       inner = '<div class="video-placeholder">' +
         '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg>' +
