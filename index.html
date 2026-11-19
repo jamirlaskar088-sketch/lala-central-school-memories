@@ -364,6 +364,33 @@
       };
     });
 
+var videoResult = await window.SB
+    .from("videos")
+    .select("*")
+    .eq("status", "published");
+
+if (videoResult.error) {
+    console.error("Supabase Video Error:", videoResult.error);
+} else {
+    var videoItems = (videoResult.data || []).map(function(item) {
+        return {
+            id: "video-" + item.id,
+            title: item.title || "",
+            description: item.description || "",
+            category: item.category || "videos",
+            section: "videos",
+            year: item.year || "",
+            image: "",
+            videoUrl: item.video_url || "",
+            event: "",
+            location: "",
+            featured: false,
+            status: item.status || ""
+        };
+    });
+
+    galleryItems = galleryItems.concat(videoItems);
+}
     updateCounts();
     render();
 
