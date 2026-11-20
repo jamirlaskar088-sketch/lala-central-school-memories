@@ -311,7 +311,7 @@
 </footer>
 
 <script>
-(function () {
+(function () 
   "use strict";
 
   /* ============================================================
@@ -506,7 +506,45 @@ if (videoResult.error) {
       grid.classList.remove("is-filtering");
     }, 160);
   }
+  function render() {
+    var items = poolFor(state.filter);
+    grid.innerHTML = items.map(function (item, i) {
+      return cardMarkup(item, item.id, Math.min(i * 45, 360));
+    }).join("");
 
+    Array.prototype.forEach.call(grid.querySelectorAll(".gallery-card"), function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-id");
+        var item = galleryItems.find(function (g) {
+          return String(g.id) === String(id);
+        });
+
+        if (!item) return;
+
+        if (item.section === "videos") {
+          openVideo(item);
+        } else {
+          openLightbox(item);
+        }
+      });
+    });
+  }
+
+  function setFilter(filter) {
+    state.filter = filter;
+
+    Array.prototype.forEach.call(tabs.querySelectorAll(".tab-btn"), function (btn) {
+      var active = btn.getAttribute("data-filter") === filter;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+
+    grid.classList.add("is-filtering");
+    window.setTimeout(function () {
+      render();
+      grid.classList.remove("is-filtering");
+    }, 160);
+  }
   tabs.addEventListener("click", function (e) {
     var btn = e.target.closest(".tab-btn");
     if (!btn) return;
@@ -594,36 +632,25 @@ if (videoResult.error) {
     var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{6,})/);
     return m ? "https://www.youtube.com/embed/" + m[1] : null;
   }
-  function openVideo(item) {
+    function openVideo(item) {
     vmTitle.textContent = item.title;
     vmMeta.textContent = item.category + " · " + item.year;
+
     var inner;
+
     if (item.videoUrl) {
       var yt = youTubeEmbed(item.videoUrl);
+
       inner = yt
         ? '<iframe src="' + yt + '" title="' + escapeHTML(item.title) + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
-        
-: '<video controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:contain;">' +
-  '<source src="' + item.videoUrl + '" type="video/mp4">' +
-  'Your browser does not support video playback.' +
-  '</video>';
-
-  Array.prototype.forEach.call(grid.querySelectorAll(".gallery-card"), function (btn) {
-  btn.addEventListener("click", function () {
-    var id = btn.getAttribute("data-id");
-    var item = galleryItems.find(function (g) {
-      return String(g.id) === String(id);
-    });
-
-    if (!item) return;
-
-    if (item.section === "videos") {
-      openVideo(item);
+        : '<video controls playsinline preload="metadata" style="width:100%;height:100%;object-fit:contain;">' +
+          '<source src="' + item.videoUrl + '" type="video/mp4">' +
+          'Your browser does not support video playback.' +
+          '</video>';
     } else {
-      openLightbox(item);
+      inner = '<div class="video-placeholder"><p>Video coming soon</p></div>';
     }
-  });
-});
+
     videoFrame.innerHTML = inner;
     videoModal.classList.add("is-open");
     document.documentElement.classList.add("no-scroll");
@@ -670,7 +697,7 @@ if (videoResult.error) {
     }, { threshold: 0.2 });
     Array.prototype.forEach.call(document.querySelectorAll(".reveal"), function (el) { io.observe(el); });
   } else {
-    Array.prototype.for9Each.call(document.querySelectorAll(".reveal"), function (el) { el.classList.add("in-view"); });
+    Array.prototype.forEach.call(document.querySelectorAll(".reveal"), function (el) { el.classList.add("in-view"); });
   }
 
   /* ---------- init ---------- */
