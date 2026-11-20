@@ -590,7 +590,7 @@ if (videoResult.error) {
     var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{6,})/);
     return m ? "https://www.youtube.com/embed/" + m[1] : null;
   }
-  function openVideo(item) {}
+  function openVideo(item) {
     vmTitle.textContent = item.title;
     vmMeta.textContent = item.category + " · " + item.year;
     var inner;
@@ -655,7 +655,7 @@ if (videoResult.error) {
     }, { threshold: 0.2 });
     Array.prototype.forEach.call(document.querySelectorAll(".reveal"), function (el) { io.observe(el); });
   } else {
-    Array.prototype.forEach.call(document.querySelectorAll(".reveal"), function (el) { el.classList.add("in-view"); });
+    Array.prototype.for9Each.call(document.querySelectorAll(".reveal"), function (el) { el.classList.add("in-view"); });
   }
 
   /* ---------- init ---------- */
