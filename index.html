@@ -479,18 +479,22 @@ if (videoResult.error) {
     grid.innerHTML = items.map(function (item, i) {
       return cardMarkup(item, item.id, Math.min(i * 45, 360));
     }).join("");
-    Array.prototype.forEach.call(grid.querySelectorAll(".gallery-card"), function (btn) {
+      Array.prototype.forEach.call(grid.querySelectorAll(".gallery-card"), function (btn) {
       btn.addEventListener("click", function () {
-        var id = Number(btn.getAttribute("data-id"));
-        var item = galleryItems.filter(function (g) { return g.id === id; })[0];
-        if (item.section === "videos") { openVideo(item); }
-        else { openLightbox(item); }
+        var id = btn.getAttribute("data-id");
+        var item = galleryItems.find(function (g) {
+          return String(g.id) === String(id);
+        });
+
+        if (!item) return;
+
+        if (item.section === "videos") {
+          openVideo(item);
+        } else {
+          openLightbox(item);
+        }
       });
     });
-  }
-
-  function setFilter(filter) {
-    state.filter = filter;
     Array.prototype.forEach.call(tabs.querySelectorAll(".tab-btn"), function (btn) {
       var active = btn.getAttribute("data-filter") === filter;
       btn.classList.toggle("is-active", active);
@@ -604,11 +608,22 @@ if (videoResult.error) {
   'Your browser does not support video playback.' +
   '</video>';
 
+  Array.prototype.forEach.call(grid.querySelectorAll(".gallery-card"), function (btn) {
+  btn.addEventListener("click", function () {
+    var id = btn.getAttribute("data-id");
+    var item = galleryItems.find(function (g) {
+      return String(g.id) === String(id);
+    });
+
+    if (!item) return;
+
+    if (item.section === "videos") {
+      openVideo(item);
     } else {
-      inner = '<div class="video-placeholder">' +
-        '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg>' +
-        '<p>Video coming soon</p></div>';
+      openLightbox(item);
     }
+  });
+});
     videoFrame.innerHTML = inner;
     videoModal.classList.add("is-open");
     document.documentElement.classList.add("no-scroll");
