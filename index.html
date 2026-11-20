@@ -590,6 +590,7 @@ if (videoResult.error) {
     var m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w-]{6,})/);
     return m ? "https://www.youtube.com/embed/" + m[1] : null;
   }
+  function openVideo(item) {}
     vmTitle.textContent = item.title;
     vmMeta.textContent = item.category + " · " + item.year;
     var inner;
