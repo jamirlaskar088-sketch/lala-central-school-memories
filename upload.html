@@ -1,0 +1,663 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Upload | Lala Central School</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6fb;
+    color: #172033;
+    min-height: 100vh;
+}
+
+header {
+    background: #101d36;
+    color: white;
+    padding: 22px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.brand h2 {
+    font-size: 19px;
+    letter-spacing: 1px;
+}
+
+.brand p {
+    color: #aebbd0;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: 600;
+}
+
+.logout {
+    background: #263957;
+    color: white;
+}
+
+main {
+    max-width: 950px;
+    margin: 40px auto;
+    padding: 0 18px;
+}
+
+.heading {
+    margin-bottom: 28px;
+}
+
+.heading h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.heading p {
+    color: #69758a;
+    font-size: 14px;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 22px;
+    box-shadow: 0 5px 22px rgba(0,0,0,.05);
+}
+
+.card h2 {
+    font-size: 19px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #dce2eb;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #315ce7;
+}
+
+textarea {
+    min-height: 85px;
+    resize: vertical;
+}
+
+.upload-btn {
+    width: 100%;
+    background: #2455db;
+    color: white;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.upload-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.message {
+    margin-top: 15px;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.success {
+    color: #16834c;
+}
+
+.error {
+    color: #d33434;
+}
+
+#dashboard {
+    display: none;
+}
+
+#loginSection {
+    max-width: 430px;
+    margin: 65px auto;
+}
+
+.file-note {
+    color: #7a8495;
+    font-size: 12px;
+    margin-top: 7px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #8992a1;
+    font-size: 12px;
+}
+
+@media(max-width:600px) {
+    header {
+        padding: 18px;
+    }
+
+    .brand h2 {
+        font-size: 15px;
+    }
+
+    main {
+        margin-top: 25px;
+    }
+
+    .card {
+        padding: 19px;
+    }
+
+    .heading h1 {
+        font-size: 24px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">
+        <h2>LALA CENTRAL SCHOOL</h2>
+        <p>MEMORIES & MOMENTS · ADMIN PORTAL</p>
+    </div>
+    <button class="logout" id="logoutBtn" hidden>Logout</button>
+</header>
+
+<main>
+
+<!-- LOGIN -->
+<section class="card" id="loginSection">
+    <h2>Administrator Login</h2>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email" required
+                   placeholder="Admin email">
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" required
+                   placeholder="Admin password">
+        </div>
+
+        <button class="upload-btn" id="loginBtn">
+            Login to Dashboard
+        </button>
+    </form>
+
+    <p class="message" id="loginMessage"></p>
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard">
+
+    <div class="heading">
+        <h1>Media Upload Dashboard</h1>
+        <p>Manage school photos and videos in one place.</p>
+    </div>
+
+    <!-- PHOTO UPLOAD -->
+    <section class="card">
+        <h2>📸 Upload School Photos</h2>
+
+        <form id="photoForm">
+
+            <div class="form-group">
+                <label>Photo Title *</label>
+                <input id="photoTitle" required
+                       placeholder="Enter photo title">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="photoDescription"
+                          placeholder="Write a description"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <input id="photoCategory"
+                       placeholder="Annual Function, Sports, Memories">
+            </div>
+
+            <div class="form-group">
+                <label>Year</label>
+                <input type="number" id="photoYear"
+                       min="1900" max="2100"
+                       placeholder="2026">
+            </div>
+
+            <div class="form-group">
+                <label>Event</label>
+                <input id="photoEvent" placeholder="Event name">
+            </div>
+
+            <div class="form-group">
+                <label>Location</label>
+                <input id="photoLocation" placeholder="Event location">
+            </div>
+
+            <div class="form-group">
+                <label>Select Photo *</label>
+                <input type="file" id="photoFile"
+                       accept="image/jpeg,image/png,image/webp"
+                       required>
+                <p class="file-note">Supported: JPG, PNG, WEBP. Maximum 10 MB.</p>
+            </div>
+
+            <button class="upload-btn" id="photoBtn">
+                Upload Photo
+            </button>
+
+            <p class="message" id="photoMessage"></p>
+        </form>
+    </section>
+
+    <!-- VIDEO UPLOAD -->
+    <section class="card">
+        <h2>🎬 Upload School Videos</h2>
+
+        <form id="videoForm">
+
+            <div class="form-group">
+                <label>Video Title *</label>
+                <input id="videoTitle" required
+                       placeholder="Enter video title">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="videoDescription"
+                          placeholder="Write a description"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <input id="videoCategory"
+                       placeholder="School Events, Sports, Memories">
+            </div>
+
+            <div class="form-group">
+                <label>Year</label>
+                <input type="number" id="videoYear"
+                       min="1900" max="2100"
+                       placeholder="2026">
+            </div>
+
+            <div class="form-group">
+                <label>Event</label>
+                <input id="videoEvent" placeholder="Event name">
+            </div>
+
+            <div class="form-group">
+                <label>Select Video *</label>
+                <input type="file" id="videoFile"
+                       accept="video/mp4,video/webm"
+                       required>
+                <p class="file-note">Supported: MP4, WEBM. Maximum 100 MB.</p>
+            </div>
+
+            <button class="upload-btn" id="videoBtn">
+                Upload Video
+            </button>
+
+            <p class="message" id="videoMessage"></p>
+        </form>
+    </section>
+
+</section>
+</main>
+
+<footer>
+    © LALA CENTRAL SCHOOL · Memories & Moments
+</footer>
+
+<script>
+// ======================================
+// SUPABASE CONFIGURATION
+// ======================================
+
+const SUPABASE_URL =
+"https://cseeptemgdytxsauiera.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_03b7psc2gJ3EOs62278Meg_O_iNilSy";
+
+const ADMIN_UID =
+"ceabd5dd-0291-40a6-8aec-25c6cf5a4ecf";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+// ======================================
+// ELEMENTS
+// ======================================
+
+const loginSection = document.getElementById("loginSection");
+const dashboard = document.getElementById("dashboard");
+const logoutBtn = document.getElementById("logoutBtn");
+
+let currentUser = null;
+
+// ======================================
+// MESSAGE HELPER
+// ======================================
+
+function showMessage(id, message, type) {
+    const element = document.getElementById(id);
+    element.textContent = message;
+    element.className = "message " + type;
+}
+
+// ======================================
+// AUTHENTICATION
+// ======================================
+
+function updatePage(user) {
+    currentUser = user;
+
+    const isAdmin = user && user.id === ADMIN_UID;
+
+    loginSection.style.display = isAdmin ? "none" : "block";
+    dashboard.style.display = isAdmin ? "block" : "none";
+    logoutBtn.hidden = !isAdmin;
+
+    if (user && !isAdmin) {
+        showMessage(
+            "loginMessage",
+            "This account is not authorized as the school administrator.",
+            "error"
+        );
+    }
+}
+
+db.auth.onAuthStateChange((event, session) => {
+    updatePage(session?.user || null);
+});
+
+async function initialize() {
+    const { data, error } = await db.auth.getSession();
+
+    if (error) {
+        showMessage("loginMessage", error.message, "error");
+        return;
+    }
+
+    updatePage(data.session?.user || null);
+}
+
+initialize();
+
+document.getElementById("loginForm").addEventListener(
+    "submit",
+    async (e) => {
+        e.preventDefault();
+
+        const button = document.getElementById("loginBtn");
+        button.disabled = true;
+        button.textContent = "Logging in...";
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        const { data, error } = await db.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) {
+            showMessage("loginMessage", error.message, "error");
+        } else if (data.user.id !== ADMIN_UID) {
+            await db.auth.signOut();
+            showMessage(
+                "loginMessage",
+                "Unauthorized administrator account.",
+                "error"
+            );
+        } else {
+            showMessage("loginMessage", "Login successful.", "success");
+        }
+
+        button.disabled = false;
+        button.textContent = "Login to Dashboard";
+    }
+);
+
+logoutBtn.addEventListener("click", async () => {
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+        alert(error.message);
+    }
+});
+
+// ======================================
+// SECURITY CHECK
+// ======================================
+
+async function verifyAdmin() {
+    const { data, error } = await db.auth.getUser();
+
+    if (error || !data.user || data.user.id !== ADMIN_UID) {
+        throw new Error("Please log in with the authorized administrator account.");
+    }
+
+    currentUser = data.user;
+    return data.user;
+}
+
+// ======================================
+// FILE NAME HELPER
+// ======================================
+
+function makeFileName(file) {
+    const extension = file.name.split(".").pop().toLowerCase();
+
+    return `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+}
+
+// ======================================
+// PHOTO UPLOAD
+// ======================================
+
+document.getElementById("photoForm").addEventListener(
+    "submit",
+    async (e) => {
+        e.preventDefault();
+
+        const button = document.getElementById("photoBtn");
+        const message = "photoMessage";
+
+        button.disabled = true;
+        button.textContent = "Uploading photo...";
+
+        try {
+            const user = await verifyAdmin();
+
+            const file = document.getElementById("photoFile").files[0];
+
+            if (!file) throw new Error("Please select a photo.");
+
+            if (file.size > 10 * 1024 * 1024) {
+                throw new Error("Photo must be smaller than 10 MB.");
+            }
+
+            if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+                throw new Error("Unsupported photo format.");
+            }
+
+            const path = makeFileName(file);
+
+            const { error: storageError } = await db.storage
+                .from("photos")
+                .upload(path, file, {
+                    contentType: file.type,
+                    upsert: false
+                });
+
+            if (storageError) throw storageError;
+
+            const { data: publicData } = db.storage
+                .from("photos")
+                .getPublicUrl(path);
+
+            const { error: databaseError } = await db
+                .from("gallery")
+                .insert({
+                    title: document.getElementById("photoTitle").value.trim(),
+                    description: document.getElementById("photoDescription").value.trim(),
+                    category: document.getElementById("photoCategory").value.trim() || null,
+                    year: document.getElementById("photoYear").value
+                        ? Number(document.getElementById("photoYear").value)
+                        : null,
+                    image_url: publicData.publicUrl,
+                    event: document.getElementById("photoEvent").value.trim() || null,
+                    location: document.getElementById("photoLocation").value.trim() || null,
+                    featured: false,
+                    status: "published",
+                    created_by: user.id,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (databaseError) throw databaseError;
+
+            showMessage(message, "Photo uploaded and saved successfully!", "success");
+            document.getElementById("photoForm").reset();
+
+        } catch (error) {
+            console.error(error);
+            showMessage(message, error.message, "error");
+        }
+
+        button.disabled = false;
+        button.textContent = "Upload Photo";
+    }
+);
+
+// ======================================
+// VIDEO UPLOAD
+// ======================================
+
+document.getElementById("videoForm").addEventListener(
+    "submit",
+    async (e) => {
+        e.preventDefault();
+
+        const button = document.getElementById("videoBtn");
+        const message = "videoMessage";
+
+        button.disabled = true;
+        button.textContent = "Uploading video...";
+
+        try {
+            const user = await verifyAdmin();
+
+            const file = document.getElementById("videoFile").files[0];
+
+            if (!file) throw new Error("Please select a video.");
+
+            if (file.size > 100 * 1024 * 1024) {
+                throw new Error("Video must be smaller than 100 MB.");
+            }
+
+            if (!["video/mp4", "video/webm"].includes(file.type)) {
+                throw new Error("Unsupported video format.");
+            }
+
+            const path = makeFileName(file);
+
+            const { error: storageError } = await db.storage
+                .from("videos")
+                .upload(path, file, {
+                    contentType: file.type,
+                    upsert: false
+                });
+
+            if (storageError) throw storageError;
+
+            const { data: publicData } = db.storage
+                .from("videos")
+                .getPublicUrl(path);
+
+            const { error: databaseError } = await db
+                .from("videos")
+                .insert({
+                    title: document.getElementById("videoTitle").value.trim(),
+                    description: document.getElementById("videoDescription").value.trim(),
+                    category: document.getElementById("videoCategory").value.trim() || null,
+                    year: document.getElementById("videoYear").value
+                        ? Number(document.getElementById("videoYear").value)
+                        : null,
+                    video_url: publicData.publicUrl,
+                    thumbnail_url: null,
+                    event: document.getElementById("videoEvent").value.trim() || null,
+                    featured: false,
+                    status: "published",
+                    created_by: user.id,
+                    updated_at: new Date().toISOString()
+                });
+
+            if (databaseError) throw databaseError;
+
+            showMessage(message, "Video uploaded and saved successfully!", "success");
+            document.getElementById("videoForm").reset();
+
+        } catch (error) {
+            console.error(error);
+            showMessage(message, error.message, "error");
+        }
+
+        button.disabled = false;
+        button.textContent = "Upload Video";
+    }
+);
+
+</script>
+
+</body>
+</html>
