@@ -457,12 +457,12 @@ if (videoResult.error) {
     document.getElementById("count-recent").textContent = poolFor("recent").length;
     document.getElementById("count-videos").textContent = poolFor("videos").length;
   }
-
-  function cardMarkup(item, seed, delay) {
+   function cardMarkup(item, seed, delay) {
     var isVideo = item.section === "videos";
     var src = item.image || (isVideo ? videoPlaceholder(seed, item.category) : photoPlaceholder(seed, item.category));
     var label = (isVideo ? "Play video: " : "View photo: ") + escapeHTML(item.title);
     var playIcon = '<span class="play-badge" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>';
+
     return '' +
       '<button class="gallery-card' + (isVideo ? ' is-video' : '') + '" type="button" data-id="' + item.id + '" style="animation-delay:' + delay + 'ms" aria-label="' + label + '">' +
         '<img src="' + src + '" alt="' + escapeHTML(item.title) + ' — ' + escapeHTML(item.category) + '" loading="lazy" width="480" height="600">' +
@@ -473,45 +473,58 @@ if (videoResult.error) {
         '</span>' +
       '</button>';
   }
+    function generateVideoThumbnail(videoUrl, imgElement) {
+    if (!videoUrl) return;
 
-  function render() {
-    var items = poolFor(state.filter);
-    grid.innerHTML = items.map(function (item, i) {
-      return cardMarkup(item, item.id, Math.min(i * 45, 360));
-    }).join("");
-      Array.prototype.forEach.call(grid.querySelectorAll(".gallery-card"), function (btn) {
-      btn.addEventListener("click", function () {
-        var id = btn.getAttribute("data-id");
-        var item = galleryItems.find(function (g) {
-          return String(g.id) === String(id);
-        });
+    var video = document.createElement("video");
+    video.crossOrigin = "anonymous";
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.src = videoUrl;
 
-        if (!item) return;
-
-        if (item.section === "videos") {
-          openVideo(item);
-        } else {
-          openLightbox(item);
-        }
-      });
+    video.addEventListener("loadedmetadata", function () {
+      video.currentTime = Math.min(1, video.duration || 1);
     });
-    Array.prototype.forEach.call(tabs.querySelectorAll(".tab-btn"), function (btn) {
-      var active = btn.getAttribute("data-filter") === filter;
-      btn.classList.toggle("is-active", active);
-      btn.setAttribute("aria-pressed", active ? "true" : "false");
+
+    video.addEventListener("seeked", function () {
+      try {
+        var canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        imgElement.src = canvas.toDataURL("image/jpeg", 0.85);
+      } catch (error) {
+        console.error("Thumbnail generation failed:", error);
+      }
+
+      video.removeAttribute("src");
+      video.load();
     });
-    grid.classList.add("is-filtering");
-    window.setTimeout(function () {
-      render();
-      grid.classList.remove("is-filtering");
-    }, 160);
+
+    video.addEventListener("error", function () {
+      console.error("Video thumbnail loading failed:", videoUrl);
+    });
   }
   function render() {
     var items = poolFor(state.filter);
     grid.innerHTML = items.map(function (item, i) {
       return cardMarkup(item, item.id, Math.min(i * 45, 360));
     }).join("");
+      items.forEach(function (item) {
+      if (item.section !== "videos" || !item.videoUrl) return;
 
+      var card = grid.querySelector('[data-id="' + item.id + '"]');
+      if (!card) return;
+
+      var img = card.querySelector("img");
+      if (img) {
+        generateVideoThumbnail(item.videoUrl, img);
+      }
+    });
     Array.prototype.forEach.call(grid.querySelectorAll(".gallery-card"), function (btn) {
       btn.addEventListener("click", function () {
         var id = btn.getAttribute("data-id");
